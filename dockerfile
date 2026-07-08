@@ -12,7 +12,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy your handler script
-COPY rp_handler.py .
-
+# Copy your handler script
+COPY handler.py .
 # Command to run your worker
-CMD ["python", "-u", "rp_handler.py"]
+CMD ["python", "-u", "handler.py"]
