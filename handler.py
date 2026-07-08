@@ -30,6 +30,9 @@ def handler(job):
     try:
         job_input = job["input"]
         messages = job_input.get("messages", [])
+        
+        if not messages:
+            return {"error": "Invalid payload format. You must provide a 'messages' array as defined by HuggingFace's chat template structure."}
 
         # We expect the payload to have: {"type": "image", "image": "data:image/jpeg;base64,..."}
         # qwen_vl_utils processes this array natively!
