@@ -3,21 +3,11 @@ import torch
 from qwen_vl_utils import process_vision_info
 from transformers import AutoProcessor, Qwen2VLForConditionalGeneration
 
-import os
-
-MODEL_ID = "Qwen/Qwen2-VL-7B-Instruct"
-if os.path.exists('/runpod-volume'):
-    model_path = os.path.join('/runpod-volume', MODEL_ID.split('/')[-1])
-    if not os.path.exists(model_path):
-        model_path = MODEL_ID
-else:
-    model_path = MODEL_ID
-
-print(f"Loading Qwen2-VL Model into VRAM from {model_path}...")
+print("Loading Qwen2-VL Model into VRAM...")
 model = Qwen2VLForConditionalGeneration.from_pretrained(
-    model_path, torch_dtype="auto", device_map="auto"
+    "Qwen/Qwen2-VL-7B-Instruct", torch_dtype="auto", device_map="auto"
 )
-processor = AutoProcessor.from_pretrained(model_path)
+processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-7B-Instruct")
 print("Model loaded successfully!")
 
 
