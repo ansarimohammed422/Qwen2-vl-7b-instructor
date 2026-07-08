@@ -1,18 +1,26 @@
-# Use an official PyTorch CUDA image
-FROM runpod/pytorch:2.2.1-py3.10-cuda12.1.1-devel-ubuntu22.04
+# 1. Base Image
+FROM runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
 
-# Set the working directory
+# 2. Set Working Directory
 WORKDIR /app
 
-# Install system dependencies (needed for image processing)
-RUN apt-get update && apt-get install -y git libgl1 libglib2.0-0
+# 3. System & Python Updates
+RUN apt-get update && apt-get install -y git libgl1 libglib2.0-0 && \
+    python -m pip install --upgrade pip
 
-# Copy your requirements and install Python packages
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# 4. Install Dependencies
+# We combine these into a single RUN command to keep the image layer size optimized.
+RUN pip install --no-cache-dir \
+    "torch>=2.4.0" \
+    "transformers>=4.40.0" \
+    "qwen-vl-utils" \
+    "accelerate" \
+    "pillow" \
+    "torchvision" \
+    "runpod"
 
-# Copy your handler script
-# Copy your handler script
+# 5. Copy Handler
 COPY handler.py .
-# Command to run your worker
+
+# 6. Start the Handler
 CMD ["python", "-u", "handler.py"]
