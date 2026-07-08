@@ -4,3 +4,4 @@ transformers
 qwen-vl-utils
 accelerate
 pillow
+torchvision
