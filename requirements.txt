@@ -1,5 +1,4 @@
 runpod
-torch
 transformers
 qwen-vl-utils
 accelerate
