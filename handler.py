@@ -30,14 +30,14 @@ else:
 try:
     print("Loading Qwen2-VL Model into VRAM...")
     model = Qwen2VLForConditionalGeneration.from_pretrained(
-        "Qwen/Qwen2-VL-7B-Instruct-AWQ", 
+        "Qwen/Qwen2-VL-7B-Instruct", 
         torch_dtype=torch.bfloat16, 
         device_map="auto",
         low_cpu_mem_usage=True,
         cache_dir=CACHE_DIR
     )
     processor = AutoProcessor.from_pretrained(
-        "Qwen/Qwen2-VL-7B-Instruct-AWQ",
+        "Qwen/Qwen2-VL-7B-Instruct",
         cache_dir=CACHE_DIR
     )
     print("Model loaded successfully!")
