@@ -8,13 +8,24 @@ import traceback
 
 import os
 
-CACHE_DIR = "/runpod-volume/huggingface" if os.path.exists("/runpod-volume") else None
+# Check for RunPod's native Model Caching (The Model field in the UI)
+RUNPOD_NATIVE_CACHE = "/runpod-volume/huggingface-cache"
 
-if CACHE_DIR:
+if os.path.exists(RUNPOD_NATIVE_CACHE):
+    print(f"Detected RunPod Native Model Cache at {RUNPOD_NATIVE_CACHE}")
+    # Tell HuggingFace to use this pre-downloaded cache
+    os.environ["HF_HOME"] = RUNPOD_NATIVE_CACHE
+    # Optional: Prevent HuggingFace from pinging the internet at all since RunPod already downloaded it
+    os.environ["HF_HUB_OFFLINE"] = "1"
+    os.environ["TRANSFORMERS_OFFLINE"] = "1"
+    CACHE_DIR = None # Let HF_HOME handle it automatically
+elif os.path.exists("/runpod-volume"):
+    print("Detected standard Network Volume. Using it for caching.")
+    CACHE_DIR = "/runpod-volume/huggingface"
     os.makedirs(CACHE_DIR, exist_ok=True)
-    print(f"Using Network Volume for Model Caching at {CACHE_DIR}")
 else:
-    print("No Network Volume detected. Using standard ephemeral cache.")
+    print("No caching volumes detected. Using standard ephemeral cache.")
+    CACHE_DIR = None
 
 try:
     print("Loading Qwen2-VL Model into VRAM...")
