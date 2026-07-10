@@ -6,15 +6,29 @@ from transformers import AutoProcessor, Qwen2VLForConditionalGeneration
 import sys
 import traceback
 
+import os
+
+CACHE_DIR = "/runpod-volume/huggingface" if os.path.exists("/runpod-volume") else None
+
+if CACHE_DIR:
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    print(f"Using Network Volume for Model Caching at {CACHE_DIR}")
+else:
+    print("No Network Volume detected. Using standard ephemeral cache.")
+
 try:
     print("Loading Qwen2-VL Model into VRAM...")
     model = Qwen2VLForConditionalGeneration.from_pretrained(
         "Qwen/Qwen2-VL-7B-Instruct", 
         torch_dtype=torch.bfloat16, 
         device_map="auto",
-        low_cpu_mem_usage=True
+        low_cpu_mem_usage=True,
+        cache_dir=CACHE_DIR
     )
-    processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-7B-Instruct")
+    processor = AutoProcessor.from_pretrained(
+        "Qwen/Qwen2-VL-7B-Instruct",
+        cache_dir=CACHE_DIR
+    )
     print("Model loaded successfully!")
 except Exception as e:
     print("FATAL ERROR DURING STARTUP:", flush=True)
