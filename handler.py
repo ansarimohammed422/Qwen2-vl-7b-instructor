@@ -32,12 +32,20 @@ try:
     model = Qwen2VLForConditionalGeneration.from_pretrained(
         "Qwen/Qwen2-VL-7B-Instruct", 
         torch_dtype=torch.bfloat16, 
+        attn_implementation="sdpa", # Fast PyTorch-native attention (no external dependencies)
         device_map="auto",
         low_cpu_mem_usage=True,
         cache_dir=CACHE_DIR
     )
+    
+    # Set reasonable limits on image resolution to prevent VRAM OOM crashes
+    min_pixels = 256 * 28 * 28
+    max_pixels = 1280 * 28 * 28
+    
     processor = AutoProcessor.from_pretrained(
         "Qwen/Qwen2-VL-7B-Instruct",
+        min_pixels=min_pixels,
+        max_pixels=max_pixels,
         cache_dir=CACHE_DIR
     )
     print("Model loaded successfully!")
@@ -77,8 +85,22 @@ def handler(job):
             return_tensors="pt",
         ).to("cuda")
 
+        # Extract dynamic generation parameters with safe defaults
+        max_new_tokens = job_input.get("max_new_tokens", 2048)
+        temperature = job_input.get("temperature", 1.0)
+        top_p = job_input.get("top_p", 1.0)
+        
+        # Determine if we should sample based on params
+        do_sample = temperature != 1.0 or top_p != 1.0
+
         # Generate the output
-        generated_ids = model.generate(**inputs, max_new_tokens=2048)
+        generated_ids = model.generate(
+            **inputs, 
+            max_new_tokens=max_new_tokens,
+            temperature=temperature,
+            top_p=top_p,
+            do_sample=do_sample
+        )
 
         # Trim the prompt from the output
         generated_ids_trimmed = [
