@@ -6,4 +6,3 @@ transformers>=4.45.0
 qwen-vl-utils
 accelerate>=0.26.0
 pillow
-flash-attn>=2.5.8 --no-build-isolation
